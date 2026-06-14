@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "jupyterhub",
+  "repo": "jupyterhub-stack-module",
+  "runtimeId": "jupyterhub",
+  "lifecycle": "active",
+  "dependencies": [
+    "stack-foundation"
+  ],
+  "overlays": [
+    "stack.compose/jupyterhub.yml",
+    "stack.config/jupyterhub",
+    "stack.containers/jupyterhub"
+  ]
+}
