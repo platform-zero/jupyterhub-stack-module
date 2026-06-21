@@ -24,7 +24,8 @@
     "stack.config/jupyterhub",
     "stack.containers/jupyterhub",
     "stack.containers/test-runner/playwright-tests/tests/deep/forward-auth/jupyterhub.spec.ts",
-    "stack.kotlin/test-runner/src/test/kotlin/org/webservices/testrunner/JupyterHubConfigTest.kt"
+    "stack.kotlin/test-runner/src/test/kotlin/org/webservices/testrunner/JupyterHubConfigTest.kt",
+    "stack.kotlin/test-runner/src/main/kotlin/org/webservices/testrunner/suites/UserInterfaceTests.kt"
   ],
   "testAssets": []
 }
