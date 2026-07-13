@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir \
 
 USER root
 RUN apt-get update && \
-    apt-get install -y ca-certificates && \
+    apt-get install -y --no-install-recommends ca-certificates && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -20,5 +20,11 @@ RUN cat /tmp/caddy-ca.crt >> /srv/venv/lib/python3.12/site-packages/certifi/cace
     update-ca-certificates
 
 RUN mkdir -p /home/jovyan/notebooks && \
+    groupadd --gid 10001 jupyterhub && \
+    useradd --uid 10001 --gid 10001 --home-dir /home/jovyan --no-create-home jupyterhub && \
+    mkdir -p /srv/jupyterhub && \
+    chown -R jupyterhub:jupyterhub /home/jovyan /srv/jupyterhub && \
     chmod 755 /home/jovyan && \
     chmod 700 /home/jovyan/notebooks
+
+USER jupyterhub
