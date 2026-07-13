@@ -1,0 +1,47 @@
+schemaVersion: 1
+module: jupyterhub
+target: apps
+services:
+  jupyterhub:
+    image: "localhost/webservices/jupyterhub:bundle"
+    build:
+      context: "./stack.containers/jupyterhub"
+      containerfile: "Dockerfile"
+    containerName: "jupyterhub"
+    lifecycle: "daemon"
+    updatePolicy: "local"
+    restart: "unless-stopped"
+    command: ["jupyterhub", "-f", "/config/jupyterhub_config.py"]
+    dependencies:
+      jupyter-notebook-build: "completed"
+      postgres-ssd-bootstrap: "completed"
+      valkey: "started"
+    networks:
+      caddy: {}
+      ai: {}
+      postgres: {}
+    environment:
+      DOCKER_HOST: "unix:///run/podman/podman.sock"
+      DOCKER_NETWORK_NAME: "webservices_rootless_ai"
+      JUPYTER_NOTEBOOK_IMAGE: "localhost/webservices/jupyter-notebook-build:bundle"
+      JUPYTER_NOTEBOOK_UID: "1000"
+      JUPYTER_NOTEBOOK_GID: "100"
+      JUPYTERHUB_ALLOWED_REMOTE_GROUPS: "${JUPYTERHUB_ALLOWED_REMOTE_GROUPS:-admins,operators,developers}"
+      POSTGRES_HOST: "postgres-ssd"
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: "webservices"
+      POSTGRES_USER: "${JUPYTERHUB_POSTGRES_USER:-}"
+      POSTGRES_PASSWORD: "${JUPYTERHUB_POSTGRES_PASSWORD:-}"
+    volumes:
+      - "jupyterhub_data:/srv/jupyterhub"
+      - "./configs/jupyterhub/jupyterhub_config.py:/config/jupyterhub_config.py:ro"
+      - "%t/podman/podman.sock:/run/podman/podman.sock"
+    health:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/hub/health || exit 1"]
+      interval: "60s"
+      timeout: "10s"
+      retries: 3
+      start_period: "90s"
+volumes:
+  jupyterhub_data:
+    hostPath: "${STACK_VOLUME_ROOT}/jupyterhub_data"
