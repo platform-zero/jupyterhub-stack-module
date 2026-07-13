@@ -5,6 +5,9 @@ import org.webservices.testrunner.framework.*
 
 suspend fun TestRunner.jupyterPipelineIntegrationTests() = suite("Jupyter Pipeline Integration Tests") {
 test("Integration: JupyterHub + Data Pipeline analysis capability") {
+        if (skipUnlessAnySelectedComponent("JupyterHub data analysis integration", "pipeline", "inference", "qdrant")) {
+            return@test
+        }
         val jupyterResponse = client.getRawResponse(endpoints.jupyterhub)
         val pipelineEndpoint = endpoints.pipeline
         require(pipelineEndpoint.isNotBlank() && pipelineEndpoint != "null") {
