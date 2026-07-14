@@ -6,7 +6,7 @@
 - Lifecycle: `active`
 
 ## Owned overlays
-- `stack.compose/jupyterhub.yml`
+- `stack.runtime.yaml`
 - `stack.config/jupyterhub`
 - `stack.containers/jupyterhub`
 

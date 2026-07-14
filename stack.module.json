@@ -19,7 +19,6 @@
   "smoke": "external-only",
   "smokeUnsupportedReason": "requires generated bundle context, deployed networking, secrets, or service dependencies",
   "overlays": [
-    "stack.compose/jupyterhub.yml",
     "stack.config/jupyterhub",
     "stack.containers/jupyterhub",
     "stack.runtime.yaml",
