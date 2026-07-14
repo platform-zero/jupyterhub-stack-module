@@ -6,7 +6,7 @@ services:
     image: "localhost/webservices/jupyterhub:bundle"
     build:
       context: "./stack.containers/jupyterhub"
-      containerfile: "Dockerfile"
+      containerfile: "Containerfile"
     containerName: "jupyterhub"
     lifecycle: "daemon"
     updatePolicy: "local"

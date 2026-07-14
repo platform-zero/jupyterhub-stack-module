@@ -25,7 +25,7 @@ class JupyterHubConfigTest {
     @Test
     fun `jupyterhub remote user login handler authenticates from proxy headers directly`() {
         val text = jupyterHubContainerConfigText()
-        val compose = Files.readString(findRepoRoot().resolve("stack.compose/jupyterhub.yml"))
+        val compose = Files.readString(findRepoRoot().resolve("stack.runtime.yaml"))
 
         assertTrue(
             text.contains("auth_model = await self.authenticator.authenticate(self, None)"),
