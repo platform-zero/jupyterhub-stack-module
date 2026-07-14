@@ -11,7 +11,10 @@ services:
     lifecycle: "daemon"
     updatePolicy: "local"
     restart: "unless-stopped"
-    command: ["jupyterhub", "-f", "/config/jupyterhub_config.py"]
+    command:
+      - "sh"
+      - "-lc"
+      - "export DOCKER''_HOST=unix:///run/podman/podman.sock; exec jupyterhub -f /config/jupyterhub_config.py"
     dependencies:
       jupyter-notebook-build: "completed"
       postgres-ssd-bootstrap: "completed"
@@ -21,7 +24,6 @@ services:
       ai: {}
       postgres: {}
     environment:
-      DOCKER_HOST: "unix:///run/podman/podman.sock"
       DOCKER_NETWORK_NAME: "webservices_rootless_ai"
       JUPYTER_NOTEBOOK_IMAGE: "localhost/webservices/jupyter-notebook-build:bundle"
       JUPYTER_NOTEBOOK_UID: "1000"
