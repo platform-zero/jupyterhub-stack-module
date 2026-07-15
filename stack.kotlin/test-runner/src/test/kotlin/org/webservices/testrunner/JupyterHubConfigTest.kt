@@ -25,7 +25,7 @@ class JupyterHubConfigTest {
     @Test
     fun `jupyterhub remote user login handler authenticates from proxy headers directly`() {
         val text = jupyterHubContainerConfigText()
-        val compose = Files.readString(findRepoRoot().resolve("stack.runtime.yaml"))
+        val runtime = Files.readString(jupyterHubRuntimeFile())
 
         assertTrue(
             text.contains("auth_model = await self.authenticator.authenticate(self, None)"),
@@ -48,7 +48,7 @@ class JupyterHubConfigTest {
             "JupyterHub remote-user auth should not use the double-escaped split pattern because it breaks group names containing the letter 's'"
         )
         assertTrue(
-            compose.contains("JUPYTERHUB_ALLOWED_REMOTE_GROUPS: \${JUPYTERHUB_ALLOWED_REMOTE_GROUPS:-admins,operators,developers}"),
+            runtime.contains("JUPYTERHUB_ALLOWED_REMOTE_GROUPS: \"\${JUPYTERHUB_ALLOWED_REMOTE_GROUPS:-admins,operators,developers}\""),
             "JupyterHub's default group allowlist should match the service contract"
         )
     }
@@ -80,6 +80,13 @@ class JupyterHubConfigTest {
     private fun jupyterHubDeployConfigText(): String {
         val config = findRepoRoot().resolve("stack.config/jupyterhub/jupyterhub_config.py")
         return Files.readString(config)
+    }
+
+    private fun jupyterHubRuntimeFile(): Path {
+        val root = findRepoRoot()
+        val moduleRuntime = root.resolve("stack.runtime.yaml")
+        if (Files.exists(moduleRuntime)) return moduleRuntime
+        return root.resolve("stack.runtime.external/jupyterhub.yaml")
     }
 
     private fun findRepoRoot(): Path {

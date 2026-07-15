@@ -24,7 +24,7 @@ services:
       ai: {}
       postgres: {}
     environment:
-      DOCKER_NETWORK_NAME: "webservices_rootless_ai"
+      DOCKER_NETWORK_NAME: "webservices_jupyterhub_ai"
       JUPYTER_NOTEBOOK_IMAGE: "localhost/webservices/jupyter-notebook-build:bundle"
       JUPYTER_NOTEBOOK_UID: "1000"
       JUPYTER_NOTEBOOK_GID: "100"
