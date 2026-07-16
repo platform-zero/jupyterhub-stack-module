@@ -118,7 +118,7 @@ async function dismissJupyterNewsPrompt(page: import('@playwright/test').Page): 
 
             // Validate notebook server API and create a notebook via Contents API.
             const contentsResponse = await page.request.get(`${userBase}/api/contents`);
-            expect(contentsResponse.ok()).toBeTruthy();
+            expect(contentsResponse.status()).toBe(200);
 
             const notebookName = `playwright-smoke-${Date.now()}.ipynb`;
             const notebookPayload = {
@@ -172,7 +172,7 @@ async function dismissJupyterNewsPrompt(page: import('@playwright/test').Page): 
               throw new Error(`Notebook create failed (${createResponse.status()}): ${body.slice(0, 500)}`);
             }
             const verifyNotebook = await page.request.get(`${userBase}/api/contents/${notebookName}`);
-            expect(verifyNotebook.ok()).toBeTruthy();
+            expect(verifyNotebook.status()).toBe(200);
 
             const notebookEvidenceSelectors = [
               '.jp-MarkdownCell .jp-RenderedHTMLCommon',
@@ -220,7 +220,7 @@ async function dismissJupyterNewsPrompt(page: import('@playwright/test').Page): 
                 async () => notebookEvidenceVisible(),
                 { timeout: 60000, intervals: [1000, 2000, 3000] }
               )
-              .toBeTruthy();
+              .toBe(true);
             await dismissJupyterNewsPrompt(page);
             await page.waitForTimeout(1500);
           },

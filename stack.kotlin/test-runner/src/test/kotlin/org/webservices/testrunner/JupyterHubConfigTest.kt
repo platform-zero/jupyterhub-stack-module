@@ -2,7 +2,6 @@ package org.webservices.testrunner
 
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
-import java.nio.file.Path
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -72,31 +71,33 @@ class JupyterHubConfigTest {
         assertTrue(deployConfig.contains("c.Spawner.pre_spawn_hook = ensure_singleuser_volume_permissions"))
     }
 
+    @Test
+    fun `rootless hub process can access its mounted podman socket`() {
+        val runtime = Files.readString(jupyterHubRuntimeFile())
+
+        assertTrue(
+            runtime.contains("user: \"0:0\""),
+            "The Hub process must run as container root so it can open the root-owned 0660 rootless Podman socket"
+        )
+        assertTrue(runtime.contains("%t/podman/podman.sock:/run/podman/podman.sock"))
+    }
+
     private fun jupyterHubContainerConfigText(): String {
-        val config = findRepoRoot().resolve("stack.containers/jupyterhub/jupyterhub_config.py")
+        val config = TestSourceFiles.modulePath(
+            "jupyterhub",
+            "stack.containers/jupyterhub/jupyterhub_config.py"
+        )
         return Files.readString(config)
     }
 
     private fun jupyterHubDeployConfigText(): String {
-        val config = findRepoRoot().resolve("stack.config/jupyterhub/jupyterhub_config.py")
+        val config = TestSourceFiles.modulePath(
+            "jupyterhub",
+            "stack.config/jupyterhub/jupyterhub_config.py"
+        )
         return Files.readString(config)
     }
 
-    private fun jupyterHubRuntimeFile(): Path {
-        val root = findRepoRoot()
-        val moduleRuntime = root.resolve("stack.runtime.yaml")
-        if (Files.exists(moduleRuntime)) return moduleRuntime
-        return root.resolve("stack.runtime.external/jupyterhub.yaml")
-    }
-
-    private fun findRepoRoot(): Path {
-        var current = Path.of("").toAbsolutePath()
-        repeat(8) {
-            if (Files.exists(current.resolve("stack.containers/jupyterhub/jupyterhub_config.py"))) {
-                return current
-            }
-            current = current.parent ?: return@repeat
-        }
-        error("Could not locate repository root from ${Path.of("").toAbsolutePath()}")
-    }
+    private fun jupyterHubRuntimeFile() =
+        TestSourceFiles.modulePath("jupyterhub", "stack.runtime.yaml")
 }
