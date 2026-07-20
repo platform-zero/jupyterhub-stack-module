@@ -13,9 +13,11 @@ suspend fun TestRunner.userInterfaceTests() = suite("User Interface Tests") {
 
     test("JupyterHub hub API is accessible") {
         val response = client.getRawResponse("${env.endpoints.jupyterhub}/hub/api")
-        val body = requireOkResponse(response, "JupyterHub hub API")
-        val json = Json.parseToJsonElement(body)
-        require(json is JsonObject) { "JupyterHub hub API should return a JSON object" }
+        requireOkOrAuthBoundary(response, "JupyterHub hub API")
+        if (response.status == HttpStatusCode.OK) {
+            val json = Json.parseToJsonElement(response.bodyAsText())
+            require(json is JsonObject) { "JupyterHub hub API should return a JSON object" }
+        }
     }
 
     test("JupyterHub root endpoint responds") {

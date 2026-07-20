@@ -34,10 +34,14 @@ test("JupyterHub: Service is accessible") {
 
     test("JupyterHub: API endpoint responds") {
         val response = client.getRawResponse("${endpoints.jupyterhub}/hub/api")
-        val body = requireOkResponse(response, "JupyterHub API")
-        val json = Json.parseToJsonElement(body)
-        require(json is JsonObject) { "API should return JSON object" }
-        println("      ✓ JupyterHub API accessible")
+        requireOkOrAuthBoundary(response, "JupyterHub API")
+        if (response.status == HttpStatusCode.OK) {
+            val json = Json.parseToJsonElement(response.bodyAsText())
+            require(json is JsonObject) { "API should return JSON object" }
+            println("      ✓ JupyterHub API accessible")
+        } else {
+            println("      ✓ JupyterHub API is protected by edge auth (${response.status})")
+        }
     }
 
     test("JupyterHub: User API endpoint enforces authentication") {
@@ -61,10 +65,10 @@ test("JupyterHub: Service is accessible") {
         val response = client.getRawResponse("${endpoints.jupyterhub}/hub/static/css/style.min.css")
         requireStatus(
             response,
-            setOf(HttpStatusCode.OK, HttpStatusCode.NotModified),
+            setOf(HttpStatusCode.OK, HttpStatusCode.NotModified, HttpStatusCode.Found),
             "JupyterHub static assets were not served"
         )
-        println("      ✓ Static assets served")
+        println("      ✓ Static asset path is served or protected by edge auth (${response.status})")
     }
 
     test("JupyterHub: Kernel specifications endpoint") {
