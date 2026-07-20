@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "exceptions": [
+    {
+      "rule": "container-root-default",
+      "path": "stack.runtime.yaml",
+      "reason": "JupyterHub manages rootless Podman workloads through the account socket and must map their users.",
+      "mitigations": ["The service runs under a dedicated rootless host account.", "Only the dedicated account Podman socket is mounted."]
+    },
+    {
+      "rule": "container-socket-mount",
+      "path": "stack.runtime.yaml",
+      "reason": "JupyterHub uses the rootless Podman API to create and stop per-user notebook workloads.",
+      "mitigations": ["The socket belongs to a dedicated unprivileged host account.", "The service is isolated on dedicated networks."]
+    }
+  ]
+}
