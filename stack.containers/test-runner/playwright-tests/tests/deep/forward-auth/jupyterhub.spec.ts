@@ -11,7 +11,6 @@ import {
   waitForGrafanaShell,
   waitForHomeAssistantShell,
 } from '../shared/forward-auth';
-import { removeJupyterContainersForUsers } from '../../../utils/jupyterhub-cleanup';
 import { serviceUrl } from '../../../utils/stack-urls';
 import { logPageTelemetry, redactUrlForLogs, setupNetworkLogging } from '../../../utils/telemetry';
 
@@ -61,6 +60,31 @@ async function dismissJupyterNewsPrompt(page: import('@playwright/test').Page): 
   }
 
   await expect(prompt).not.toBeVisible({ timeout: 10000 }).catch(() => {});
+}
+
+async function stopJupyterServerForUser(
+  page: import('@playwright/test').Page,
+  username: string
+): Promise<void> {
+  const stopUrl = serviceUrl(
+    'jupyterhub',
+    `/hub/api/users/${encodeURIComponent(username)}/server`
+  );
+  const response = await page.request.delete(stopUrl).catch(() => null);
+  if (!response) {
+    console.warn(`   ⚠️  Could not request Jupyter server cleanup for ${username}`);
+    return;
+  }
+
+  if (![202, 204, 404].includes(response.status())) {
+    const body = await response.text().catch(() => '');
+    console.warn(
+      `   ⚠️  Jupyter server cleanup returned ${response.status()} for ${username}: ${body.slice(0, 300)}`
+    );
+    return;
+  }
+
+  console.log(`   🧹 Requested Jupyter server cleanup for ${username}`);
 }
 
   test('JupyterHub - Spawn notebook with forward auth', async ({ page }) => {
@@ -227,9 +251,6 @@ async function dismissJupyterNewsPrompt(page: import('@playwright/test').Page): 
         }
       );
     } finally {
-      const removedJupyterContainers = removeJupyterContainersForUsers([testUser.username]);
-      if (removedJupyterContainers.length > 0) {
-        console.log(`   🧹 Removed Jupyter notebook containers: ${removedJupyterContainers.join(', ')}`);
-      }
+      await stopJupyterServerForUser(page, testUser.username);
     }
   });
