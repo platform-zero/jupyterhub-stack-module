@@ -70,7 +70,13 @@ async function stopJupyterServerForUser(
     'jupyterhub',
     `/hub/api/users/${encodeURIComponent(username)}/server`
   );
-  const response = await page.request.delete(stopUrl).catch(() => null);
+  const xsrfCookie = (await page.context().cookies(stopUrl))
+    .find((cookie) => cookie.name === '_xsrf');
+  const headers: Record<string, string> = { Referer: page.url() };
+  if (xsrfCookie?.value) {
+    headers['X-XSRFToken'] = decodeURIComponent(xsrfCookie.value);
+  }
+  const response = await page.request.delete(stopUrl, { headers }).catch(() => null);
   if (!response) {
     console.warn(`   ⚠️  Could not request Jupyter server cleanup for ${username}`);
     return;
